@@ -19,6 +19,10 @@ connectDB();
 
 // auth Route
 app.use('/api/auth', require('./routes/auth'));
+// conversation Route
+app.use("/api/conversations", require("./routes/conversations"));
+// messages Route
+app.use("/api/messages", require("./routes/messages"));
 
 // Test route
 app.get('/', (req, res) => res.send('API is running'));
