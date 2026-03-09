@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+</head>
+<body>
+
+<script>
+const socket = io("http://localhost:5000");
+
+socket.on("connect", () => {
+  console.log("Connected:", socket.id);
+
+  socket.emit("user-online", "12345");
+});
+
+socket.on("user-online", (id)=>{
+  console.log("User online:", id);
+});
+
+socket.on("user-offline", (id)=>{
+  console.log("User offline:", id);
+});
+</script>
+
+</body>
+</html>
