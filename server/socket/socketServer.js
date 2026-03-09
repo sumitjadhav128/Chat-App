@@ -1,23 +1,58 @@
+const socketio = require("socket.io");
+
 function setupSocket(server) {
-  const io = require('socket.io')(server, { cors: { origin: '*' } });
 
-  io.on('connection', (socket) => {
-    console.log('New user connected', socket.id);
+const io = socketio(server,{
+cors:{origin:"*"}
+});
 
-    // User comes online
-    socket.on('user-online', (userId) => {
-      socket.userId = userId;
-      io.emit('user-online', userId);
-    });
+// store connected users
+let onlineUsers = [];
 
-    // User disconnects
-    socket.on('disconnect', () => {
-      if (socket.userId) io.emit('user-offline', socket.userId);
-      console.log('User disconnected', socket.id);
-    });
-  });
+const addUser = (userId, socketId) => {
+if(!onlineUsers.some(user => user.userId === userId)){
+onlineUsers.push({userId, socketId});
+}
+};
 
-  return io;
+const removeUser = (socketId) => {
+onlineUsers = onlineUsers.filter(user => user.socketId !== socketId);
+};
+
+const getUser = (userId) => {
+return onlineUsers.find(user => user.userId === userId);
+};
+
+io.on("connection",(socket)=>{
+
+console.log("User connected:",socket.id);
+
+socket.on("add-user",(userId)=>{
+addUser(userId, socket.id);
+io.emit("get-users", onlineUsers);
+});
+
+socket.on("send-message",({senderId, receiverId, text})=>{
+
+const user = getUser(receiverId);
+
+if(user){
+io.to(user.socketId).emit("receive-message",{
+senderId,
+text
+});
+}
+
+});
+
+socket.on("disconnect",()=>{
+console.log("User disconnected:",socket.id);
+removeUser(socket.id);
+io.emit("get-users", onlineUsers);
+});
+
+});
+
 }
 
 module.exports = setupSocket;

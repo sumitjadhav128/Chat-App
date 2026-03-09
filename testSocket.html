@@ -1,26 +1,68 @@
 <!DOCTYPE html>
 <html>
 <head>
+<title>Socket Test</title>
 <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 </head>
+
 <body>
 
+<h2>Socket Test Page</h2>
+
+<label>User ID:</label>
+<input id="userId" placeholder="Enter your user ID">
+
+<br><br>
+
+<label>Receiver ID:</label>
+<input id="receiverId" placeholder="Enter receiver ID">
+
+<br><br>
+
+<label>Message:</label>
+<input id="message" placeholder="Enter message">
+
+<br><br>
+
+<button onclick="connectUser()">Connect</button>
+<button onclick="sendMessage()">Send Message</button>
+
 <script>
+
 const socket = io("http://localhost:5000");
 
-socket.on("connect", () => {
-  console.log("Connected:", socket.id);
+function connectUser(){
 
-  socket.emit("user-online", "12345");
+const userId = document.getElementById("userId").value;
+
+socket.emit("add-user", userId);
+
+console.log("Connected as:", userId);
+
+}
+
+function sendMessage(){
+
+const senderId = document.getElementById("userId").value;
+const receiverId = document.getElementById("receiverId").value;
+const text = document.getElementById("message").value;
+
+socket.emit("send-message",{
+senderId,
+receiverId,
+text
 });
 
-socket.on("user-online", (id)=>{
-  console.log("User online:", id);
+}
+
+socket.on("receive-message",(data)=>{
+
+console.log("Message received:",data);
+
+alert("Message from " + data.senderId + ": " + data.text);
+
 });
 
-socket.on("user-offline", (id)=>{
-  console.log("User offline:", id);
-});
 </script>
 
 </body>
