@@ -200,14 +200,14 @@ messageDiv.classList.add("message");
 if(senderId === currentUserId){
 
 messageDiv.classList.add("me");
+messageDiv.innerText = "Me: " + text;
 
 }else{
 
 messageDiv.classList.add("other");
+messageDiv.innerText = senderId + ": " + text;
 
 }
-
-messageDiv.innerText = text;
 
 document.getElementById("messages").appendChild(messageDiv);
 
