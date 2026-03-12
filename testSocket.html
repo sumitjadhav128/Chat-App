@@ -111,6 +111,9 @@ socket.emit("join-conversation", conversationId);
 
 console.log("Joined conversation:", conversationId);
 
+// load previous chat
+loadMessages(conversationId);
+
 }
 
 function sendMessage(){
@@ -135,6 +138,34 @@ document.getElementById("messageInput").value = "";
 
 }
 
+// load msg
+async function loadMessages(conversationId){
+
+try{
+
+const res = await fetch(
+"http://localhost:5000/api/messages/" + conversationId
+);
+
+const messages = await res.json();
+
+document.getElementById("messages").innerHTML="";
+
+messages.forEach(msg => {
+
+addMessage(msg.text, msg.senderId);
+
+});
+
+}catch(error){
+
+console.log("Error loading messages", error);
+
+}
+
+}
+
+// add msg
 function addMessage(text, senderId){
 
 const currentUserId =
