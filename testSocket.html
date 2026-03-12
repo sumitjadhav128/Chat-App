@@ -76,6 +76,9 @@ height:15px;
 <button onclick="connectUser()">Connect</button>
 <button onclick="joinConversation()">Join Chat</button>
 
+<h4>Online Users</h4>
+<ul id="onlineUsers"></ul>
+
 <hr>
 
 <div id="messages"></div>
@@ -137,6 +140,25 @@ text
 document.getElementById("messageInput").value = "";
 
 }
+
+// listening for online user
+socket.on("get-users",(users)=>{
+
+const list = document.getElementById("onlineUsers");
+
+list.innerHTML = "";
+
+users.forEach(user => {
+
+const li = document.createElement("li");
+
+li.innerText = user.userId + " 🟢";
+
+list.appendChild(li);
+
+});
+
+});
 
 // load msg
 async function loadMessages(conversationId){
