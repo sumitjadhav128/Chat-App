@@ -9,13 +9,13 @@
 
 <h2>Socket Test Page</h2>
 
+<label>Conversation ID:</label>
+<input id="conversationId">
+
 <label>User ID:</label>
 <input id="userId" placeholder="Enter your user ID">
 
 <br><br>
-
-<label>Receiver ID:</label>
-<input id="receiverId" placeholder="Enter receiver ID">
 
 <br><br>
 
@@ -26,10 +26,22 @@
 
 <button onclick="connectUser()">Connect</button>
 <button onclick="sendMessage()">Send Message</button>
+<button onclick="joinConversation()">Join Conversation</button>
 
 <script>
 
 const socket = io("http://localhost:5000");
+
+function joinConversation(){
+
+const conversationId =
+document.getElementById("conversationId").value;
+
+socket.emit("join-conversation", conversationId);
+
+console.log("Joined conversation:", conversationId);
+
+}
 
 function connectUser(){
 
@@ -43,23 +55,39 @@ console.log("Connected as:", userId);
 
 function sendMessage(){
 
-const senderId = document.getElementById("userId").value;
-const receiverId = document.getElementById("receiverId").value;
-const text = document.getElementById("message").value;
+const conversationId =
+document.getElementById("conversationId").value;
+
+const senderId =
+document.getElementById("userId").value;
+
+const text =
+document.getElementById("message").value;
 
 socket.emit("send-message",{
+conversationId,
 senderId,
-receiverId,
 text
 });
 
 }
 
+
+
+// receive
 socket.on("receive-message",(data)=>{
 
-console.log("Message received:",data);
+const currentUserId =
+document.getElementById("userId").value;
+
+// if sender is NOT the current user → show alert
+if(data.senderId !== currentUserId){
 
 alert("Message from " + data.senderId + ": " + data.text);
+
+}
+
+console.log("Message received:",data);
 
 });
 

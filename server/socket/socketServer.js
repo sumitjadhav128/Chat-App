@@ -27,21 +27,29 @@ io.on("connection",(socket)=>{
 
 console.log("User connected:",socket.id);
 
+// user joins a conversation room
+socket.on("join-conversation",(conversationId)=>{
+
+socket.join(conversationId);
+
+console.log("User joined conversation:", conversationId);
+
+});
+
 socket.on("add-user",(userId)=>{
 addUser(userId, socket.id);
 io.emit("get-users", onlineUsers);
 });
 
-socket.on("send-message",({senderId, receiverId, text})=>{
 
-const user = getUser(receiverId);
+// send message to that room
+socket.on("send-message",({conversationId, senderId, text})=>{
 
-if(user){
-io.to(user.socketId).emit("receive-message",{
+io.to(conversationId).emit("receive-message",{
+conversationId,
 senderId,
 text
 });
-}
 
 });
 
