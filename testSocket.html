@@ -1,38 +1,106 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Socket Test</title>
+<title>Chat UI Test</title>
+<span id="notificationDot" style="color:red;display:none;">● New Message</span>
 <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+
+<style>
+
+body{
+font-family: Arial;
+background:#f2f2f2;
+}
+
+#chatContainer{
+width:400px;
+margin:auto;
+margin-top:50px;
+background:white;
+padding:20px;
+border-radius:10px;
+box-shadow:0 0 10px rgba(0,0,0,0.1);
+}
+
+#messages{
+height:300px;
+overflow-y:auto;
+border:1px solid #ddd;
+padding:10px;
+margin-bottom:10px;
+}
+
+.message{
+margin:5px 0;
+padding:8px;
+border-radius:6px;
+max-width:70%;
+}
+
+.me{
+background:#dcf8c6;
+margin-left:auto;
+text-align:right;
+}
+
+.other{
+background:#eee;
+}
+
+#typingStatus{
+font-size:12px;
+color:gray;
+height:15px;
+}
+
+</style>
+
 </head>
 
 <body>
 
-<h2>Socket Test Page</h2>
+<div id="chatContainer">
 
-<label>Conversation ID:</label>
+<h3>Chat Test</h3>
+
+<label>User ID</label>
+<input id="userId" placeholder="User ID">
+
+<br><br>
+
+<label>Conversation ID</label>
 <input id="conversationId">
-
-<label>User ID:</label>
-<input id="userId" placeholder="Enter your user ID">
-
-<br><br>
-
-<br><br>
-
-<label>Message:</label>
-<input id="message" placeholder="Enter message">
-
-<p id="typingStatus"></p>
 
 <br><br>
 
 <button onclick="connectUser()">Connect</button>
-<button onclick="sendMessage()">Send Message</button>
-<button onclick="joinConversation()">Join Conversation</button>
+<button onclick="joinConversation()">Join Chat</button>
+
+<hr>
+
+<div id="messages"></div>
+
+<p id="typingStatus"></p>
+
+<input id="messageInput" placeholder="Type message">
+
+<button onclick="sendMessage()">Send</button>
+
+</div>
 
 <script>
 
 const socket = io("http://localhost:5000");
+
+function connectUser(){
+
+const userId = document.getElementById("userId").value;
+
+socket.emit("add-user", userId);
+
+console.log("Connected as:", userId);
+
+}
 
 function joinConversation(){
 
@@ -45,16 +113,6 @@ console.log("Joined conversation:", conversationId);
 
 }
 
-function connectUser(){
-
-const userId = document.getElementById("userId").value;
-
-socket.emit("add-user", userId);
-
-console.log("Connected as:", userId);
-
-}
-
 function sendMessage(){
 
 const conversationId =
@@ -64,7 +122,8 @@ const senderId =
 document.getElementById("userId").value;
 
 const text =
-document.getElementById("message").value;
+document.getElementById("messageInput").value;
+document.getElementById("notificationDot").style.display="none";
 
 socket.emit("send-message",{
 conversationId,
@@ -72,13 +131,58 @@ senderId,
 text
 });
 
+document.getElementById("messageInput").value = "";
+
 }
 
+function addMessage(text, senderId){
 
-//tying status
-const messageInput = document.getElementById("message");
+const currentUserId =
+document.getElementById("userId").value;
 
-messageInput.addEventListener("input", () => {
+const messageDiv = document.createElement("div");
+
+messageDiv.classList.add("message");
+
+if(senderId === currentUserId){
+
+messageDiv.classList.add("me");
+
+}else{
+
+messageDiv.classList.add("other");
+
+}
+
+messageDiv.innerText = text;
+
+document.getElementById("messages").appendChild(messageDiv);
+
+document.getElementById("messages").scrollTop =
+document.getElementById("messages").scrollHeight;
+
+}
+
+socket.on("receive-message",(data)=>{
+
+addMessage(data.text, data.senderId);
+
+const currentUserId =
+document.getElementById("userId").value;
+
+// show notification if message from other user
+if(data.senderId !== currentUserId){
+
+document.getElementById("notificationDot").style.display="block";
+
+}
+
+});
+
+const messageInput =
+document.getElementById("messageInput");
+
+messageInput.addEventListener("input",()=>{
 
 const conversationId =
 document.getElementById("conversationId").value;
@@ -86,19 +190,19 @@ document.getElementById("conversationId").value;
 const senderId =
 document.getElementById("userId").value;
 
-socket.emit("typing", {
+socket.emit("typing",{
 conversationId,
 senderId
 });
 
-setTimeout(() => {
+setTimeout(()=>{
 
-socket.emit("stop-typing", {
+socket.emit("stop-typing",{
 conversationId,
 senderId
 });
 
-}, 1000);
+},1000);
 
 });
 
@@ -112,24 +216,6 @@ senderId + " is typing...";
 socket.on("stop-typing",()=>{
 
 document.getElementById("typingStatus").innerText = "";
-
-});
-
-
-// receive
-socket.on("receive-message",(data)=>{
-
-const currentUserId =
-document.getElementById("userId").value;
-
-// if sender is NOT the current user → show alert
-if(data.senderId !== currentUserId){
-
-alert("Message from " + data.senderId + ": " + data.text);
-
-}
-
-console.log("Message received:",data);
 
 });
 
