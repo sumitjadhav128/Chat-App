@@ -76,6 +76,31 @@ console.log("Message Save Error:", error);
 
 });
 
+//read recepit
+socket.on("mark-seen", async ({ messageId, userId }) => {
+
+try {
+
+const message = await Message.findById(messageId);
+
+if (!message.seenBy.includes(userId)) {
+message.seenBy.push(userId);
+await message.save();
+}
+
+io.to(message.conversationId).emit("message-seen", {
+messageId: message._id,
+seenBy: message.seenBy
+});
+
+} catch (error) {
+
+console.log("Seen update error:", error);
+
+}
+
+});
+
 socket.on("disconnect",()=>{
 console.log("User disconnected:",socket.id);
 removeUser(socket.id);
