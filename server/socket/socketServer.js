@@ -1,3 +1,4 @@
+const Message = require("../models/Message");
 const socketio = require("socket.io");
 
 function setupSocket(server) {
@@ -43,13 +44,35 @@ io.emit("get-users", onlineUsers);
 
 
 // send message to that room
-socket.on("send-message",({conversationId, senderId, text})=>{
+socket.on("send-message", async ({ conversationId, senderId, text }) => {
 
-io.to(conversationId).emit("receive-message",{
-conversationId,
-senderId,
-text
+try {
+
+const newMessage = new Message({
+conversationId: conversationId,
+senderId: senderId,
+text: text,
+seenBy: [senderId] // sender has seen their own message
 });
+
+const savedMessage = await newMessage.save();
+
+io.to(conversationId).emit("receive-message", {
+_id: savedMessage._id,
+conversationId: savedMessage.conversationId,
+senderId: savedMessage.senderId,
+text: savedMessage.text,
+seenBy: savedMessage.seenBy,
+createdAt: savedMessage.createdAt
+});
+
+console.log(savedMessage);
+
+} catch (error) {
+
+console.log("Message Save Error:", error);
+
+}
 
 });
 
