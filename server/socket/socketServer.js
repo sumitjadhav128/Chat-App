@@ -82,6 +82,20 @@ removeUser(socket.id);
 io.emit("get-users", onlineUsers);
 });
 
+//typing event
+socket.on("typing", ({ conversationId, senderId }) => {
+
+socket.to(conversationId).emit("typing", senderId);
+
+});
+
+//stop typing event
+socket.on("stop-typing", ({ conversationId, senderId }) => {
+
+socket.to(conversationId).emit("stop-typing", senderId);
+
+});
+
 });
 
 }
