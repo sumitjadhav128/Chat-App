@@ -10,6 +10,7 @@ const server = http.createServer(app);
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use("/uploads", express.static("uploads"));
 
 // Connect Database
 console.log("make sure service is start");
@@ -23,6 +24,8 @@ app.use('/api/auth', require('./routes/auth'));
 app.use("/api/conversations", require("./routes/conversations"));
 // messages Route
 app.use("/api/messages", require("./routes/messages"));
+// upload Route
+app.use("/api/upload",  require("./routes/upload"));
 
 // Test route
 app.get('/', (req, res) => res.send('API is running'));

@@ -44,7 +44,7 @@ io.emit("get-users", onlineUsers);
 
 
 // send message to that room
-socket.on("send-message", async ({ conversationId, senderId, text }) => {
+socket.on("send-message", async ({ conversationId, senderId, text, attachments }) => {
 
 try {
 
@@ -52,6 +52,7 @@ const newMessage = new Message({
 conversationId: conversationId,
 senderId: senderId,
 text: text,
+attachments,
 seenBy: [senderId] // sender has seen their own message
 });
 
@@ -63,6 +64,7 @@ conversationId: savedMessage.conversationId,
 senderId: savedMessage.senderId,
 text: savedMessage.text,
 seenBy: savedMessage.seenBy,
+attachments: savedMessage.attachments,
 createdAt: savedMessage.createdAt
 });
 

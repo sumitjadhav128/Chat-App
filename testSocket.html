@@ -3,6 +3,9 @@
 <head>
 <title>Chat UI Test</title>
 <span id="notificationDot" style="color:red;display:none;">● New Message</span>
+<p>conversation Id: 69aec37b771c6249207fe8f4</p>
+<p>UserA : 69ae654f407212bde009c9ac</p>
+<p>UserB : 69aec2cc771c6249207fe8f2</p>
 <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 
 <style>
@@ -87,6 +90,8 @@ height:15px;
 
 <input id="messageInput" placeholder="Type message">
 
+<input type="file" id="fileInput">
+
 <button onclick="sendMessage()">Send</button>
 
 </div>
@@ -119,7 +124,7 @@ loadMessages(conversationId);
 
 }
 
-function sendMessage(){
+async function sendMessage(){
 
 const conversationId =
 document.getElementById("conversationId").value;
@@ -129,15 +134,40 @@ document.getElementById("userId").value;
 
 const text =
 document.getElementById("messageInput").value;
-document.getElementById("notificationDot").style.display="none";
+
+const file =
+document.getElementById("fileInput").files[0];
+
+let attachments = [];
+
+if(file){
+
+const formData = new FormData();
+
+formData.append("file", file);
+
+const res = await fetch(
+"http://localhost:5000/api/upload",
+{
+method:"POST",
+body:formData
+});
+
+const data = await res.json();
+
+attachments.push(data.fileUrl);
+
+}
 
 socket.emit("send-message",{
 conversationId,
 senderId,
-text
+text,
+attachments
 });
 
-document.getElementById("messageInput").value = "";
+document.getElementById("messageInput").value="";
+document.getElementById("fileInput").value="";
 
 }
 
@@ -175,7 +205,7 @@ document.getElementById("messages").innerHTML="";
 
 messages.forEach(msg => {
 
-addMessage(msg.text, msg.senderId);
+addMessage(msg.text, msg.senderId, msg.attachments || []);
 
 });
 
@@ -188,7 +218,7 @@ console.log("Error loading messages", error);
 }
 
 // add msg
-function addMessage(text, senderId){
+function addMessage(text, senderId, attachments=[]){
 
 const currentUserId =
 document.getElementById("userId").value;
@@ -200,14 +230,36 @@ messageDiv.classList.add("message");
 if(senderId === currentUserId){
 
 messageDiv.classList.add("me");
-messageDiv.innerText = "Me: " + text;
 
 }else{
 
 messageDiv.classList.add("other");
-messageDiv.innerText = senderId + ": " + text;
 
 }
+
+if(text){
+messageDiv.innerHTML = "<p>"+text+"</p>";
+}
+
+attachments.forEach(file=>{
+
+const img = document.createElement("img");
+
+img.src = file;
+img.style.width="150px";
+img.style.display="block";
+img.style.marginTop="5px";
+
+const link = document.createElement("a");
+
+link.href = file;
+link.target = "_blank";
+
+link.appendChild(img);
+
+messageDiv.appendChild(link);
+
+});
 
 document.getElementById("messages").appendChild(messageDiv);
 
@@ -216,9 +268,12 @@ document.getElementById("messages").scrollHeight;
 
 }
 
+
+
+
 socket.on("receive-message",(data)=>{
 
-addMessage(data.text, data.senderId);
+addMessage(data.text, data.senderId, data.attachments || []);
 
 const currentUserId =
 document.getElementById("userId").value;
