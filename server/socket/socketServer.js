@@ -103,6 +103,72 @@ console.log("Seen update error:", error);
 
 });
 
+// add edit msg
+socket.on("edit-message", async ({ messageId, newText, senderId, conversationId }) => {
+
+try{
+
+const message = await Message.findById(messageId);
+
+if(!message) return;
+
+// ownership check
+if(message.senderId.toString() !== senderId){
+console.log("Unauthorized edit attempt");
+return;
+}
+
+// update fields
+message.text = newText;
+message.isEdited = true;
+
+await message.save();
+
+io.to(conversationId).emit("message-edited",{
+messageId: message._id,
+newText: message.text,
+isEdited: message.isEdited
+});
+
+}catch(err){
+console.log("Edit Error:",err);
+}
+
+});
+
+// add delete msg 
+socket.on("delete-message", async ({ messageId, senderId, conversationId }) => {
+
+try{
+
+const message = await Message.findById(messageId);
+
+if(!message) return;
+
+// ownership check
+if(message.senderId.toString() !== senderId){
+console.log("Unauthorized delete attempt");
+return;
+}
+
+// mark as deleted
+message.text = "";
+message.attachments = [];
+message.isDeleted = true;
+
+await message.save();
+
+io.to(conversationId).emit("message-deleted",{
+messageId: message._id
+});
+
+}catch(err){
+console.log("Delete Error:",err);
+}
+
+});
+
+// disconnect
 socket.on("disconnect",()=>{
 console.log("User disconnected:",socket.id);
 removeUser(socket.id);

@@ -93,6 +93,8 @@ height:15px;
 <input type="file" id="fileInput">
 
 <button onclick="sendMessage()">Send</button>
+<button onclick="editLastMessage()">Edit Last</button>
+<button onclick="deleteLastMessage()">Delete Last</button>
 
 </div>
 
@@ -110,6 +112,65 @@ console.log("Connected as:", userId);
 
 }
 
+
+function editLastMessage(){
+console.log("Edit button clicked");
+const messages =
+document.querySelectorAll(".message");
+
+const last = messages[messages.length-1];
+
+const messageId = last.getAttribute("data-id");
+
+socket.emit("edit-message",{
+messageId,
+newText:"Edited message"
+});
+
+}
+
+function deleteLastMessage(){
+
+const messages =
+document.querySelectorAll(".message");
+
+const last = messages[messages.length-1];
+
+const messageId = last.getAttribute("data-id");
+
+socket.emit("delete-message",{messageId});
+
+}
+
+// start edit
+function startEdit(messageId){
+
+const msg = document.querySelector(
+`[data-id="${messageId}"]`
+);
+
+if(!msg) return;
+
+const textEl = msg.querySelector(".message-text");
+
+const currentText = textEl.innerText;
+
+const newText = prompt("Edit message:", currentText);
+
+if(!newText) return;
+
+socket.emit("edit-message",{
+messageId,
+newText,
+senderId:
+document.getElementById("userId").value,
+conversationId:
+document.getElementById("conversationId").value
+});
+
+}
+
+// join chat
 function joinConversation(){
 
 const conversationId =
@@ -123,6 +184,7 @@ console.log("Joined conversation:", conversationId);
 loadMessages(conversationId);
 
 }
+
 
 async function sendMessage(){
 
@@ -203,9 +265,14 @@ const messages = await res.json();
 
 document.getElementById("messages").innerHTML="";
 
-messages.forEach(msg => {
+messages.forEach(msg=>{
 
-addMessage(msg.text, msg.senderId, msg.attachments || []);
+addMessage(
+msg._id,
+msg.text,
+msg.senderId,
+msg.attachments || []
+);
 
 });
 
@@ -218,37 +285,41 @@ console.log("Error loading messages", error);
 }
 
 // add msg
-function addMessage(text, senderId, attachments=[]){
+function addMessage(messageId, text, senderId, attachments = []) {
 
 const currentUserId =
 document.getElementById("userId").value;
 
 const messageDiv = document.createElement("div");
-
 messageDiv.classList.add("message");
 
+// store message id
+messageDiv.setAttribute("data-id", messageId);
+
+// sender styling
 if(senderId === currentUserId){
-
 messageDiv.classList.add("me");
-
 }else{
-
 messageDiv.classList.add("other");
-
 }
 
-if(text){
-messageDiv.innerHTML = "<p>"+text+"</p>";
-}
+// message text
+const textEl = document.createElement("p");
+textEl.classList.add("message-text");
+textEl.innerText = text || "";
+messageDiv.appendChild(textEl);
 
-attachments.forEach(file=>{
+
+// attachments
+attachments.forEach(file => {
 
 const img = document.createElement("img");
 
 img.src = file;
-img.style.width="150px";
-img.style.display="block";
-img.style.marginTop="5px";
+img.style.width = "150px";
+img.style.display = "block";
+img.style.marginTop = "5px";
+img.style.cursor = "pointer";
 
 const link = document.createElement("a");
 
@@ -261,28 +332,59 @@ messageDiv.appendChild(link);
 
 });
 
+
+// edit & delete only for sender
+if(senderId === currentUserId){
+
+const editBtn = document.createElement("button");
+editBtn.innerText = "Edit";
+editBtn.style.marginRight = "5px";
+
+editBtn.onclick = () => startEdit(messageId);
+
+const deleteBtn = document.createElement("button");
+deleteBtn.innerText = "Delete";
+
+deleteBtn.onclick = () => {
+
+socket.emit("delete-message",{
+messageId,
+senderId:
+document.getElementById("userId").value,
+conversationId:
+document.getElementById("conversationId").value
+});
+
+};
+
+messageDiv.appendChild(editBtn);
+messageDiv.appendChild(deleteBtn);
+
+}
+
 document.getElementById("messages").appendChild(messageDiv);
 
+// auto scroll
 document.getElementById("messages").scrollTop =
 document.getElementById("messages").scrollHeight;
 
 }
 
-
-
-
+// receive message
 socket.on("receive-message",(data)=>{
 
-addMessage(data.text, data.senderId, data.attachments || []);
+addMessage(
+data._id,
+data.text,
+data.senderId,
+data.attachments || []
+);
 
 const currentUserId =
 document.getElementById("userId").value;
 
-// show notification if message from other user
 if(data.senderId !== currentUserId){
-
 document.getElementById("notificationDot").style.display="block";
-
 }
 
 });
@@ -314,6 +416,43 @@ senderId
 
 });
 
+// listen for edit event
+socket.on("message-edited",(data)=>{
+
+const msg = document.querySelector(
+`[data-id="${data.messageId}"]`
+);
+
+if(msg){
+
+const textEl = msg.querySelector(".message-text");
+
+if(textEl){
+
+textEl.innerText = data.newText + " (edited)";
+
+}
+
+}
+
+});
+
+//listen for delete event
+socket.on("message-deleted",(data)=>{
+
+const msg = document.querySelector(
+`[data-id="${data.messageId}"]`
+);
+
+if(msg){
+
+msg.innerHTML = "<i>This message was deleted</i>";
+
+}
+
+});
+
+//typing
 socket.on("typing",(senderId)=>{
 
 document.getElementById("typingStatus").innerText =
@@ -326,6 +465,8 @@ socket.on("stop-typing",()=>{
 document.getElementById("typingStatus").innerText = "";
 
 });
+
+// start edit
 
 </script>
 
