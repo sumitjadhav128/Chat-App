@@ -33,7 +33,7 @@ socket.on("join-conversation",(conversationId)=>{
 
 socket.join(conversationId);
 
-console.log("User joined conversation:", conversationId);
+console.log(`User ${socket.id} joined conversation ${conversationId}`);
 
 });
 
@@ -166,6 +166,40 @@ messageId: message._id
 console.log("Delete Error:",err);
 }
 
+});
+
+// add reaction
+socket.on("add-reaction", async ({ messageId, userId, emoji, conversationId }) => {
+    try {
+        const message = await Message.findById(messageId);
+        if(!message) return;
+
+        const index = message.reactions.findIndex(r => r.userId.toString() === userId);
+
+        if(index !== -1){
+            if(message.reactions[index].emoji === emoji){
+                // remove reaction
+                message.reactions.splice(index,1);
+            }else{
+                // change reaction
+                message.reactions[index].emoji = emoji;
+            }
+        }else{
+            // add new reaction
+            message.reactions.push({userId, emoji});
+        }
+
+        await message.save();
+
+        // Emit to ALL sockets in the conversation room
+        io.to(conversationId).emit("reaction-updated", {
+            messageId,
+            reactions: message.reactions
+        });
+
+    } catch(err) {
+        console.log("Reaction error:", err);
+    }
 });
 
 // disconnect

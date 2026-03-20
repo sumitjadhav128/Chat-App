@@ -22,6 +22,16 @@ type: mongoose.Schema.Types.ObjectId,
 ref:"User"
 }],
 
+reactions:[
+{
+userId:{
+type:mongoose.Schema.Types.ObjectId,
+ref:"User"
+},
+emoji:String
+}
+],
+
 isEdited:{
 type:Boolean,
 default:false

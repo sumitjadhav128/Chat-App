@@ -56,6 +56,14 @@ color:gray;
 height:15px;
 }
 
+.message .reaction-buttons{
+display:none;
+}
+
+.message:hover .reaction-buttons{
+display:block;
+}
+
 </style>
 
 </head>
@@ -111,6 +119,11 @@ socket.emit("add-user", userId);
 console.log("Connected as:", userId);
 
 }
+
+// window loading
+window.onload = () => {
+    joinConversation();
+};
 
 
 function editLastMessage(){
@@ -252,6 +265,15 @@ list.appendChild(li);
 
 });
 
+// auto join on page loads
+window.onload = () => {
+    const conversationId = document.getElementById("conversationId").value;
+    if(conversationId) {
+        socket.emit("join-conversation", conversationId);
+        console.log("Auto joined conversation:", conversationId);
+    }
+};
+
 // load msg
 async function loadMessages(conversationId){
 
@@ -286,90 +308,84 @@ console.log("Error loading messages", error);
 
 // add msg
 function addMessage(messageId, text, senderId, attachments = []) {
+    const currentUserId = document.getElementById("userId").value;
 
-const currentUserId =
-document.getElementById("userId").value;
+    const messageDiv = document.createElement("div");
+    messageDiv.classList.add("message");
+    messageDiv.setAttribute("data-id", messageId);
 
-const messageDiv = document.createElement("div");
-messageDiv.classList.add("message");
+    // sender styling
+    messageDiv.classList.add(senderId === currentUserId ? "me" : "other");
 
-// store message id
-messageDiv.setAttribute("data-id", messageId);
+    // message text
+    const textEl = document.createElement("p");
+    textEl.classList.add("message-text");
+    textEl.innerText = text || "";
+    messageDiv.appendChild(textEl);
 
-// sender styling
-if(senderId === currentUserId){
-messageDiv.classList.add("me");
-}else{
-messageDiv.classList.add("other");
+    // attachments
+    attachments.forEach(file => {
+        const img = document.createElement("img");
+        img.src = file;
+        img.style.width = "150px";
+        img.style.display = "block";
+        img.style.marginTop = "5px";
+        img.style.cursor = "pointer";
+
+        const link = document.createElement("a");
+        link.href = file;
+        link.target = "_blank";
+        link.appendChild(img);
+        messageDiv.appendChild(link);
+    });
+
+    // reaction display container (must be added for EVERY message)
+    const reactionDisplay = document.createElement("div");
+    reactionDisplay.classList.add("reactions");
+    messageDiv.appendChild(reactionDisplay);
+
+    // reaction buttons
+    const reactionContainer = document.createElement("div");
+    reactionContainer.classList.add("reaction-buttons");
+    ["👍","❤️","😂"].forEach(emoji => {
+        const btn = document.createElement("button");
+        btn.innerText = emoji;
+        btn.onclick = () => {
+            socket.emit("add-reaction",{
+                messageId,
+                userId: currentUserId,
+                emoji,
+                conversationId: document.getElementById("conversationId").value
+            });
+        };
+        reactionContainer.appendChild(btn);
+    });
+    messageDiv.appendChild(reactionContainer);
+
+    // edit & delete only for sender
+    if(senderId === currentUserId){
+        const editBtn = document.createElement("button");
+        editBtn.innerText = "Edit";
+        editBtn.style.marginRight = "5px";
+        editBtn.onclick = () => startEdit(messageId);
+
+        const deleteBtn = document.createElement("button");
+        deleteBtn.innerText = "Delete";
+        deleteBtn.onclick = () => {
+            socket.emit("delete-message",{
+                messageId,
+                senderId: currentUserId,
+                conversationId: document.getElementById("conversationId").value
+            });
+        };
+
+        messageDiv.appendChild(editBtn);
+        messageDiv.appendChild(deleteBtn);
+    }
+
+    document.getElementById("messages").appendChild(messageDiv);
+    document.getElementById("messages").scrollTop = document.getElementById("messages").scrollHeight;
 }
-
-// message text
-const textEl = document.createElement("p");
-textEl.classList.add("message-text");
-textEl.innerText = text || "";
-messageDiv.appendChild(textEl);
-
-
-// attachments
-attachments.forEach(file => {
-
-const img = document.createElement("img");
-
-img.src = file;
-img.style.width = "150px";
-img.style.display = "block";
-img.style.marginTop = "5px";
-img.style.cursor = "pointer";
-
-const link = document.createElement("a");
-
-link.href = file;
-link.target = "_blank";
-
-link.appendChild(img);
-
-messageDiv.appendChild(link);
-
-});
-
-
-// edit & delete only for sender
-if(senderId === currentUserId){
-
-const editBtn = document.createElement("button");
-editBtn.innerText = "Edit";
-editBtn.style.marginRight = "5px";
-
-editBtn.onclick = () => startEdit(messageId);
-
-const deleteBtn = document.createElement("button");
-deleteBtn.innerText = "Delete";
-
-deleteBtn.onclick = () => {
-
-socket.emit("delete-message",{
-messageId,
-senderId:
-document.getElementById("userId").value,
-conversationId:
-document.getElementById("conversationId").value
-});
-
-};
-
-messageDiv.appendChild(editBtn);
-messageDiv.appendChild(deleteBtn);
-
-}
-
-document.getElementById("messages").appendChild(messageDiv);
-
-// auto scroll
-document.getElementById("messages").scrollTop =
-document.getElementById("messages").scrollHeight;
-
-}
-
 // receive message
 socket.on("receive-message",(data)=>{
 
@@ -414,6 +430,42 @@ senderId
 
 },1000);
 
+});
+
+// reaction-update
+socket.on("reaction-updated", (data) => {
+    const msg = document.querySelector(`[data-id="${data.messageId}"]`);
+    if(!msg) return;
+
+    const reactionDiv = msg.querySelector(".reactions");
+    if(!reactionDiv) return;
+
+    reactionDiv.innerHTML = "";
+
+    const currentUserId = document.getElementById("userId").value;
+
+    // Group reactions by emoji
+    const reactionMap = {};
+    data.reactions.forEach(r => {
+        if(!reactionMap[r.emoji]) reactionMap[r.emoji] = [];
+        reactionMap[r.emoji].push(r.userId);
+    });
+
+    Object.keys(reactionMap).forEach(emoji => {
+        const users = reactionMap[emoji];
+        const span = document.createElement("span");
+
+        span.innerText = emoji + " " + users.length;
+        span.style.marginRight = "8px";
+
+        if(users.includes(currentUserId)){
+            span.style.background = "#d1f7c4";
+            span.style.borderRadius = "5px";
+            span.style.padding = "2px 6px";
+        }
+
+        reactionDiv.appendChild(span);
+    });
 });
 
 // listen for edit event
