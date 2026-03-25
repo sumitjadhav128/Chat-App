@@ -1,15 +1,20 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import API from "../services/api";
+import Sidebar from "../components/Sidebar";
+import ChatWindow from "../components/ChatWindow";
 
-export default function ChatPage() {
+export default function ChatPage(){
 
-const userId = "69ae654f407212bde009c9ac"; // temporary test
+const [conversations,setConversations] = useState([]);
+const [currentChat,setCurrentChat] = useState(null);
+
+const userId = "69aec2cc771c6249207fe8f2"; // temporary
 
 useEffect(()=>{
 
-API.get("/conversations/" + userId)
+API.get("/conversations/"+userId)
 .then(res=>{
-console.log("Conversations:",res.data);
+setConversations(res.data);
 })
 .catch(err=>{
 console.log(err);
@@ -18,9 +23,20 @@ console.log(err);
 },[]);
 
 return(
-<div>
-<h2>Chat Page</h2>
+
+<div style={{display:"flex",height:"100vh"}}>
+
+<Sidebar
+conversations={conversations}
+setCurrentChat={setCurrentChat}
+/>
+
+<ChatWindow
+currentChat={currentChat}
+/>
+
 </div>
+
 );
 
 }
