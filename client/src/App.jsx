@@ -1,0 +1,21 @@
+import { Routes, Route } from 'react-router-dom'
+import RegisterPage from './pages/RegisterPage'
+import LoginPage from './pages/LoginPage'
+import ChatPage from './pages/ChatPage'
+
+function App() {
+
+  return (
+    <>
+     <Routes>
+      <Route path="/" element={<RegisterPage />} />
+      <Route path="/register" element={<RegisterPage></RegisterPage>}></Route>
+      {/* <Route path="/" element={<RegisterPage />} /> */}
+        <Route path="/login" element={<LoginPage></LoginPage>}></Route>
+        <Route path="/chat" element={<ChatPage />} />
+     </Routes>
+    </>
+  )
+}
+
+export default App

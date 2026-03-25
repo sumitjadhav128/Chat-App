@@ -64,6 +64,8 @@ display:none;
 display:block;
 }
 
+
+
 </style>
 
 </head>
@@ -96,6 +98,7 @@ display:block;
 
 <p id="typingStatus"></p>
 
+<div id="replyPreview" style="display:none;background:#eee;padding:5px;margin-bottom:5px;"></div>
 <input id="messageInput" placeholder="Type message">
 
 <input type="file" id="fileInput">
@@ -142,6 +145,34 @@ newText:"Edited message"
 
 }
 
+// stores msg user want to reply
+let replyingToMessageId = null;
+let replyingToText = "";
+
+// reply button
+function addReplyButton(messageDiv, messageId, text){
+
+const replyBtn = document.createElement("button");
+
+replyBtn.innerText="Reply";
+
+replyBtn.onclick = () => {
+
+replyingToMessageId = messageId;
+replyingToText = text;
+
+document.getElementById("replyPreview").innerText =
+"Replying to: " + text;
+
+document.getElementById("replyPreview").style.display="block";
+
+};
+
+messageDiv.appendChild(replyBtn);
+
+}
+
+// delete message
 function deleteLastMessage(){
 
 const messages =
@@ -238,9 +269,13 @@ socket.emit("send-message",{
 conversationId,
 senderId,
 text,
-attachments
+attachments,
+replyTo:replyingToMessageId
 });
 
+replyingToMessageId=null;
+
+document.getElementById("replyPreview").style.display="none";
 document.getElementById("messageInput").value="";
 document.getElementById("fileInput").value="";
 
@@ -293,7 +328,8 @@ addMessage(
 msg._id,
 msg.text,
 msg.senderId,
-msg.attachments || []
+msg.attachments || [],
+msg.replyTo
 );
 
 });
@@ -307,7 +343,7 @@ console.log("Error loading messages", error);
 }
 
 // add msg
-function addMessage(messageId, text, senderId, attachments = []) {
+function addMessage(messageId, text, senderId, attachments = [], replyTo) {
     const currentUserId = document.getElementById("userId").value;
 
     const messageDiv = document.createElement("div");
@@ -316,6 +352,32 @@ function addMessage(messageId, text, senderId, attachments = []) {
 
     // sender styling
     messageDiv.classList.add(senderId === currentUserId ? "me" : "other");
+
+    // message reference
+    if(replyTo){
+
+const replyDiv = document.createElement("div");
+
+replyDiv.classList.add("reply-to");
+
+replyDiv.style.fontSize="0.85em";
+replyDiv.style.background="#f0f0f0";
+replyDiv.style.padding="2px 5px";
+replyDiv.style.borderLeft="3px solid #ccc";
+replyDiv.style.marginBottom="3px";
+
+const originalMessage = document.querySelector(
+`[data-id="${replyTo}"] .message-text`
+);
+
+replyDiv.innerText =
+originalMessage
+? originalMessage.innerText
+: "Original message deleted";
+
+messageDiv.appendChild(replyDiv);
+
+}
 
     // message text
     const textEl = document.createElement("p");
@@ -385,6 +447,7 @@ function addMessage(messageId, text, senderId, attachments = []) {
 
     document.getElementById("messages").appendChild(messageDiv);
     document.getElementById("messages").scrollTop = document.getElementById("messages").scrollHeight;
+    addReplyButton(messageDiv, messageId, text);
 }
 // receive message
 socket.on("receive-message",(data)=>{
@@ -393,7 +456,8 @@ addMessage(
 data._id,
 data.text,
 data.senderId,
-data.attachments || []
+data.attachments || [],
+data.replyTo
 );
 
 const currentUserId =
@@ -431,6 +495,8 @@ senderId
 },1000);
 
 });
+
+
 
 // reaction-update
 socket.on("reaction-updated", (data) => {
@@ -518,7 +584,6 @@ document.getElementById("typingStatus").innerText = "";
 
 });
 
-// start edit
 
 </script>
 

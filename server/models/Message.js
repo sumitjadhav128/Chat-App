@@ -17,6 +17,12 @@ text:String,
 
 attachments:[String],
 
+replyTo:{
+type:mongoose.Schema.Types.ObjectId,
+ref:"Message",
+default:null
+},
+
 seenBy:[{
 type: mongoose.Schema.Types.ObjectId,
 ref:"User"
