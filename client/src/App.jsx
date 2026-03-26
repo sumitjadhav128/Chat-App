@@ -3,6 +3,8 @@ import RegisterPage from './pages/RegisterPage'
 import LoginPage from './pages/LoginPage'
 import ChatPage from './pages/ChatPage'
 
+import ProtectedRoute from "./components/ProtectedRoute";
+
 function App() {
 
   return (
@@ -12,7 +14,14 @@ function App() {
       <Route path="/register" element={<RegisterPage></RegisterPage>}></Route>
       {/* <Route path="/" element={<RegisterPage />} /> */}
         <Route path="/login" element={<LoginPage></LoginPage>}></Route>
-        <Route path="/chat" element={<ChatPage />} />
+        <Route
+path="/chat"
+element={
+<ProtectedRoute>
+<ChatPage/>
+</ProtectedRoute>
+}
+/>
      </Routes>
     </>
   )

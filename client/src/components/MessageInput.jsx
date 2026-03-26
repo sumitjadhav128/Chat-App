@@ -1,12 +1,27 @@
 import { useState } from "react";
+import socket from "../services/socket";
+import { useContext } from "react";
+import { AuthContext } from "../context/AuthContext";
 
-export default function MessageInput(){
+
+export default function MessageInput({conversation}){
 
 const [text,setText] = useState("");
 
+const userId = "69ae654f407212bde009c9ac"; // temporary
+ const { currentUser } = useContext(AuthContext);
+
 const handleSend = () => {
 
-console.log("Send:",text);
+if(!text.trim()) return;
+
+socket.emit("send-message",{
+
+conversationId: conversation._id,
+senderId: currentUser._id,  // senderId: currentUser.user._id,
+text: text
+
+});
 
 setText("");
 

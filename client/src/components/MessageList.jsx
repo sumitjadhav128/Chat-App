@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import API from "../services/api";
+import socket from "../services/socket";
 
 export default function MessageList({conversation}){
 
@@ -12,10 +13,25 @@ if(!conversation) return;
 API.get("/messages/"+conversation._id)
 .then(res=>{
 setMessages(res.data);
-})
-.catch(err=>{
-console.log(err);
 });
+
+},[conversation]);
+
+
+// realtime listener
+useEffect(()=>{
+
+socket.on("receive-message",(data)=>{
+
+if(data.conversationId === conversation._id){
+
+setMessages((prev)=>[...prev,data]);
+
+}
+
+});
+
+return ()=>socket.off("receive-message");
 
 },[conversation]);
 
@@ -28,6 +44,7 @@ padding:"10px"
 }}>
 
 {messages.map((msg)=>(
+
 <div
 key={msg._id}
 style={{
@@ -41,6 +58,7 @@ borderRadius:"6px"
 {msg.text}
 
 </div>
+
 ))}
 
 </div>
