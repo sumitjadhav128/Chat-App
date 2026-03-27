@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
 import API from "../services/api";
 import socket from "../services/socket";
+import { useContext } from "react";
+import { AuthContext } from "../context/AuthContext";
 
 export default function MessageList({conversation}){
 
 const [messages,setMessages] = useState([]);
+const { currentUser } = useContext(AuthContext);
 
 useEffect(()=>{
 
@@ -43,23 +46,48 @@ overflowY:"scroll",
 padding:"10px"
 }}>
 
-{messages.map((msg)=>(
+{messages.map((msg)=>{
+
+const isMine = msg.senderId === currentUser._id;
+
+return(
 
 <div
 key={msg._id}
 style={{
-marginBottom:"10px",
-padding:"8px",
-background:"#f1f1f1",
-borderRadius:"6px"
+display:"flex",
+justifyContent:isMine ? "flex-end" : "flex-start",
+marginBottom:"10px"
+}}
+>
+
+<div
+style={{
+maxWidth:"60%",
+padding:"10px",
+borderRadius:"10px",
+background:isMine ? "#dcf8c6" : "#ffffff",
+border:"1px solid #ddd"
 }}
 >
 
 {msg.text}
 
+<div style={{
+fontSize:"10px",
+textAlign:"right",
+marginTop:"5px"
+}}>
+{new Date(msg.createdAt).toLocaleTimeString()}
 </div>
 
-))}
+</div>
+
+</div>
+
+);
+
+})}
 
 </div>
 

@@ -37,6 +37,7 @@ return(
 
 <Sidebar
 conversations={conversations}
+setConversations={setConversations}
 setCurrentChat={setCurrentChat}
 />
 
