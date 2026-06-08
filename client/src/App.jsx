@@ -22,6 +22,7 @@ element={
 </ProtectedRoute>
 }
 />
+<Route path="*" element={<h1 style={ {color: "red", margin: "50px auto"}}>Page Not Exist</h1>}></Route>
      </Routes>
     </>
   )

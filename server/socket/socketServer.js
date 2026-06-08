@@ -1,9 +1,10 @@
+const mongoose = require("mongoose");
 const Message = require("../models/Message");
 const socketio = require("socket.io");
-
+let io;
 function setupSocket(server) {
 
-const io = socketio(server,{
+io = socketio(server,{
 cors:{origin:"*"}
 });
 
@@ -44,66 +45,46 @@ io.emit("get-users", onlineUsers);
 
 
 // send message to that room
-socket.on("send-message", async ({ conversationId, senderId, text, attachments, replyTo=null }) => {
+socket.on("send-message", async ({
+conversationId,
+senderId,
+text,
+attachments,
+replyTo=null
+}) => {
 
 try {
 
 const newMessage = new Message({
-conversationId: conversationId,
-senderId: senderId,
-text: text,
+conversationId,
+senderId,
+text,
 attachments,
 replyTo,
-seenBy: [senderId] // sender has seen their own message
+seenBy:[senderId]
 });
 
 const savedMessage = await newMessage.save();
 
-io.to(conversationId).emit("receive-message", {
-_id: savedMessage._id,
-conversationId: savedMessage.conversationId,
-senderId: savedMessage.senderId,
-text: savedMessage.text,
-seenBy: savedMessage.seenBy,
-attachments: savedMessage.attachments,
-replyTo: savedMessage.replyTo,
-createdAt: savedMessage.createdAt
-});
+const populatedMessage =
+await Message.findById(savedMessage._id)
+.populate("replyTo","text");
 
-console.log(savedMessage);
+io.to(conversationId).emit(
+"receive-message",
+populatedMessage
+);
 
-} catch (error) {
+console.log(populatedMessage);
 
-console.log("Message Save Error:", error);
+} catch(error){
+
+console.log("Message Save Error:",error);
 
 }
 
 });
 
-//read recepit
-socket.on("mark-seen", async ({ messageId, userId }) => {
-
-try {
-
-const message = await Message.findById(messageId);
-
-if (!message.seenBy.includes(userId)) {
-message.seenBy.push(userId);
-await message.save();
-}
-
-io.to(message.conversationId).emit("message-seen", {
-messageId: message._id,
-seenBy: message.seenBy
-});
-
-} catch (error) {
-
-console.log("Seen update error:", error);
-
-}
-
-});
 
 // add edit msg
 socket.on("edit-message", async ({ messageId, newText, senderId, conversationId }) => {
@@ -225,8 +206,54 @@ socket.to(conversationId).emit("stop-typing", senderId);
 
 });
 
+// seen, unseen
+
+socket.on("mark-seen", async ({conversationId,userId})=>{
+
+try{
+
+await Message.updateMany(
+{
+conversationId: new mongoose.Types.ObjectId(conversationId),
+seenBy: {
+$ne: new mongoose.Types.ObjectId(userId)
+}
+},
+{
+$push:{
+seenBy: new mongoose.Types.ObjectId(userId)
+}
+}
+);
+
+const updatedMessages = await Message.find({
+conversationId: new mongoose.Types.ObjectId(conversationId)
+});
+
+io.to(conversationId).emit(
+"messages-seen",
+updatedMessages
+);
+
+}catch(err){
+
+console.log("mark-seen error:",err);
+
+}
+
+});
+
 });
 
 }
 
-module.exports = setupSocket;
+function getIo(){
+
+return io;
+
+}
+
+module.exports = {
+setupSocket,
+getIo
+};

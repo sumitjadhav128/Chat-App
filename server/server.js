@@ -26,12 +26,21 @@ app.use("/api/conversations", require("./routes/conversations"));
 app.use("/api/messages", require("./routes/messages"));
 // upload Route
 app.use("/api/upload",  require("./routes/upload"));
+// userRoute
+app.use("/api/user",  require("./routes/user"));
 
 // Test route
 app.get('/', (req, res) => res.send('API is running'));
 
+// 404 route
+app.use((req, res) => {
+  res.status(404).json({
+    msg: "Route not found"
+  });
+});
+
 // Socket setup
-const setupSocket = require('./socket/socketServer');
+const { setupSocket } = require("./socket/socketServer");
 setupSocket(server);
 
 // Start server
