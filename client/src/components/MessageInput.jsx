@@ -90,70 +90,39 @@ handleSend();
 };
 
 
-return(
+return (
+  <div className="input-dock">
+    {/* Input Reply Preview Tracker */}
+    {replyMessage && (
+      <div className="input-dock-reply-banner">
+        <span>Replying to: <strong>{replyMessage.text}</strong></span>
+        <button onClick={() => setReplyMessage(null)} className="action-btn" style={{color: "var(--danger-color)"}}>
+          Cancel
+        </button>
+      </div>
+    )}
 
-<div style={{borderTop:"1px solid #ccc", padding:"10px"}}>
+    {/* Primary Text Entry Row layout */}
+    <div className="input-row-layout">
+      <textarea
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        onKeyDown={handleKeyDown}
+        className="message-textarea"
+        placeholder="Type a message..."
+      />
 
-{/* Reply preview */}
+      <input
+        type="file"
+        onChange={(e) => setFile(e.target.files[0])}
+        className="file-input-custom"
+      />
 
-{replyMessage && (
-
-<div style={{
-background:"#eee",
-padding:"5px",
-marginBottom:"5px",
-display:"flex",
-justifyContent:"space-between",
-alignItems:"center"
-}}>
-
-<span>
-Replying to: {replyMessage.text}
-</span>
-
-<button
-onClick={()=>setReplyMessage(null)}
->
-Cancel
-</button>
-
-</div>
-
-)}
-
-{/* Input area */}
-
-<div style={{display:"flex"}}>
-
-<textarea
-value={text}
-onChange={(e)=>setText(e.target.value)}
-onKeyDown={handleKeyDown}
-style={{
-flex:1,
-padding:"8px",
-resize:"none",
-height:"40px"
-}}
-placeholder="Type a message"
-/>
-
-<input
-type="file"
-onChange={(e)=>setFile(e.target.files[0])}
-/>
-
-<button
-onClick={handleSend}
-style={{marginLeft:"10px"}}
->
-Send
-</button>
-
-</div>
-
-</div>
-
+      <button onClick={handleSend} className="send-btn">
+        Send
+      </button>
+    </div>
+  </div>
 );
 
 }

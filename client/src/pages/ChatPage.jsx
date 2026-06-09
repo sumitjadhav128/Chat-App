@@ -6,6 +6,8 @@ import { AuthContext } from "../context/AuthContext";
 import socket from "../services/socket";
 import UpdateProfile from "../components/updateProfile";
 
+import "../styles/ChatPage.css"
+
 export default function ChatPage(){
 
 const [messages,setMessages] = useState([]);
@@ -94,30 +96,49 @@ socket.off("new-conversation");
 
 },[currentUser]);
 
-return(
+return (
+  <div className="chat-page-container">
+    
+    {/* Add responsive dynamic classes to Sidebar wrapper container */}
+    <div className={`chat-sidebar ${currentChat ? "hide-on-mobile" : ""}`}>
+      <Sidebar
+        conversations={conversations}
+        setConversations={setConversations}
+        setCurrentChat={setCurrentChat}
+        onlineUsers={onlineUsers}
+      />
+    </div>
 
-<div style={{display:"flex",height:"100vh"}}>
+    {/* Add responsive dynamic classes to ChatWindow wrapper container */}
+    <div className={`chat-window ${currentChat ? "show-on-mobile" : "hide-on-mobile"}`}>
+      
+      {/* 📱 MOBILE HEADER: This injects a clean top navigation bar on phones */}
+      {currentChat && (
+        <div className="mobile-chat-header">
+          <button 
+            className="back-btn" 
+            onClick={() => setCurrentChat(null)} // Setting currentChat to null returns to Sidebar view
+          >
+            ← Back
+          </button>
+          <span className="user-name" style={{ margin: 0 }}>
+            {currentChat.isGroup
+              ? currentChat.groupName || "Group Chat"
+              : "Active Chat"}
+          </span>
+        </div>
+      )}
 
-<Sidebar
-conversations={conversations}
-setConversations={setConversations}
-setCurrentChat={setCurrentChat}
-onlineUsers={onlineUsers}
-/>
+      <ChatWindow
+        currentChat={currentChat}
+        messages={messages}
+        setMessages={setMessages}
+        replyMessage={replyMessage}
+        setReplyMessage={setReplyMessage}
+      />
+    </div>
 
-{/* <UpdateProfile>
-</UpdateProfile> */}
-
-<ChatWindow
-currentChat={currentChat}
-messages={messages}
-setMessages={setMessages}
-replyMessage={replyMessage}
-setReplyMessage={setReplyMessage}
-/>
-
-</div>
-
+  </div>
 );
 
 }

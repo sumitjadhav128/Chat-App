@@ -193,224 +193,137 @@ console.log(error);
 
 };
 
-return(
+return (
+  <div className="chat-sidebar">
+    <input
+      type="text"
+      placeholder="Search users..."
+      value={search}
+      onChange={(e) => setSearch(e.target.value)}
+      className="search-input"
+    />
 
-<div style={{
-width:"300px",
-borderRight:"1px solid #ccc",
-padding:"10px"
-}}>
+    {/* Render User Results */}
 
-<input
-type="text"
-placeholder="Search users..."
-value={search}
-onChange={(e)=>setSearch(e.target.value)}
-style={{
-width:"100%",
-padding:"8px",
-marginBottom:"10px"
-}}
-/>
+    <h3 className="section-title">Available Users</h3>
+    {results.map((user) => (
+      <div
+        key={user._id}
+        onClick={() => startChat(user)}
+        className="user-search-item"
+      >
+        <div className="user-name">{user.name}</div>
+        <div className="user-email">{user.email}</div>
+      </div>
+    ))}
 
-{/* // render result */}
-{results.map(user=>(
+    <button onClick={() => setShowGroupModal(true)} className="btn-primary">
+      + Create Group
+    </button>
 
-<div
-key={user._id}
-onClick={()=>startChat(user)}
-style={{
-padding:"8px",
-cursor:"pointer",
-borderBottom:"1px solid #eee"
-}}
->
+    <h3 className="section-title">Your Chats</h3>
 
-<div>{user.name}</div>
-
-<div style={{
-fontSize:"12px",
-color:"gray"
-}}>
-{user.email}
-</div>
-
-</div>
-
-))}
-
-{/* <button onClick={startChat}>
-Start Chat
-</button> */}
-
-<button
-onClick={()=>setShowGroupModal(true)}
->
-+ Create Group
-</button>
-
-<h3>Chats</h3>
-
-{conversations.map((conv)=>{
-
-const otherUser = conv.members.find(
-member =>
-String(member._id) !== String(currentUser._id)
-);
-
-const isOnline = onlineUsers.some(
-user =>
-String(user.userId) === String(otherUser?._id)
-);
-
-return(
-
-<div
-key={conv._id}
-onClick={()=>setCurrentChat(conv)}
-style={{
-padding:"10px",
-borderBottom:"1px solid #eee",
-cursor:"pointer"
-}}
->
-
-<div>
-
-{/* CHAT NAME */}
-
-<div>
-
-{conv.isGroup
-? conv.groupName || "Group Chat"
-: otherUser?.name || otherUser?.email || "User"}
-
-</div>
-
-{/* ONLINE STATUS */}
-
-{!conv.isGroup && (
-
-<div style={{
-fontSize:"12px",
-color:isOnline ? "green" : "gray"
-}}>
-
-{isOnline ? "● Online" : "Offline"}
-
-</div>
-
-)}
-
-</div>
-
-</div>
-
-);
-
-})
-}
- 
- {/* // group creation */}
-{showGroupModal && (
-
-<div style={{
-position:"fixed",
-top:"50%",
-left:"50%",
-transform:"translate(-50%,-50%)",
-background:"white",
-padding:"20px",
-border:"1px solid #ccc",
-borderRadius:"8px",
-maxHeight: "200px",
-overflowY: "auto",
-zIndex:1000
-
-}}>
-
-<h3>Create Group</h3>
-
-<input
-  type="text"
-  placeholder="Group Name"
-  value={groupName}
-  onChange={(e) => setGroupName(e.target.value)}
-/>
-
-<input
-  type="text"
-  placeholder="Search members..."
-  value={groupSearch}
-  onChange={(e) => setGroupSearch(e.target.value)}
-/>
-
-<h4>Select Members</h4>
-
-{groupResults.map(user => (
-
-  <div
-    key={user._id}
-    onClick={() => {
-
-      const exists = selectedMembers.find(
-        m => m._id === user._id
+    {conversations.map((conv) => {
+      const otherUser = conv.members.find(
+        (member) => String(member._id) !== String(currentUser._id)
       );
 
-      if (!exists) {
-        setSelectedMembers(prev => [...prev, user]);
-      }
+      const isOnline = onlineUsers.some(
+        (user) => String(user.userId) === String(otherUser?._id)
+      );
 
-    }}
-    style={{
-      padding: "5px",
-      cursor: "pointer"
-    }}
-  >
+      return (
+        <div
+          key={conv._id}
+          onClick={() => setCurrentChat(conv)}
+          className="conversation-item"
+        >
+          <div>
+            <div className="user-name">
+              {conv.isGroup
+                ? conv.groupName || "Group Chat"
+                : otherUser?.name || otherUser?.email || "User"}
+            </div>
 
-    {user.name} ({user.email})
+            {!conv.isGroup && (
+              <div className={`status-text ${isOnline ? "status-online" : ""}`}>
+                {isOnline ? "● Online" : "Offline"}
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    })}
 
+    {/* Group Creation Modal Overlay */}
+    {showGroupModal && (
+      <div className="modal-overlay-backdrop">
+        <div className="modal-surface-card">
+          <h3>Create Group</h3>
+
+          <input
+            type="text"
+            placeholder="Group Name"
+            value={groupName}
+            onChange={(e) => setGroupName(e.target.value)}
+            className="search-input"
+          />
+
+          <input
+            type="text"
+            placeholder="Search members..."
+            value={groupSearch}
+            onChange={(e) => setGroupSearch(e.target.value)}
+            className="search-input"
+          />
+
+          <h4>Select Members</h4>
+          <div style={{ maxHeight: "120px", overflowY: "auto" }}>
+            {groupResults.map((user) => {
+              const exists = selectedMembers.find((m) => m._id === user._id);
+              return (
+                <div
+                  key={user._id}
+                  onClick={() => {
+                    if (!exists) {
+                      setSelectedMembers((prev) => [...prev, user]);
+                    }
+                  }}
+                  className="user-search-item"
+                  style={{ padding: "6px" }}
+                >
+                  <span className="user-name" style={{ fontSize: "13px" }}>
+                    {user.name} ({user.email})
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+
+          <div>
+            {selectedMembers.map((user) => (
+              <span key={user._id} className="pill-badge">
+                {user.name}
+              </span>
+            ))}
+          </div>
+
+          <div className="modal-footer-actions">
+            <button onClick={() => setShowGroupModal(false)} className="btn-secondary">
+              Cancel
+            </button>
+            <button
+              onClick={createGroup}
+              className="btn-primary"
+              style={{ width: "auto", marginBottom: 0 }}
+            >
+              Create Group
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
   </div>
-
-))}
-
-<div>
-
-  {selectedMembers.map(user => (
-
-    <span
-      key={user._id}
-      style={{
-        margin: "5px",
-        padding: "5px",
-        border: "1px solid #ccc"
-      }}
-    >
-      {user.name}
-    </span>
-
-  ))}
-
-</div>
-
-<button onClick={createGroup}>
-Create Group
-</button>
-
-<button
-onClick={()=>
-setShowGroupModal(false)
-}
->
-Cancel
-</button>
-
-</div>
-
-)}
-
-</div>
-
 );
 
 }

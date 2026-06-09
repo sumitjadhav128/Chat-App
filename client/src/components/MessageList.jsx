@@ -179,231 +179,102 @@ element.style.backgroundColor="";
 };
 
 
-return(
-
-<div style={{
-flex:1,
-overflowY:"scroll",
-padding:"10px"
-}}>
-
-{messages.map((msg)=>{
-
-const isMine =
-String(msg.senderId) === String(currentUser._id);
-
-return(
-
-<div
-id={`msg-${msg._id}`}
-key={msg._id}
-style={{
-display:"flex",
-justifyContent:isMine ? "flex-end" : "flex-start",
-marginBottom:"10px"
-}}
->
-
-<div
-style={{
-maxWidth:"60%",
-padding:"10px",
-borderRadius:"10px",
-background:isMine ? "#dcf8c6" : "#ffffff",
-border:"1px solid #ddd"
-}}
->
-
-    {/* // msg text */}
-
-
- {/* file attachments */}
-    {msg.attachments?.map((file,i)=>(
-
-<img
-key={i}
-src={file}
-alt=""
-style={{
-width:"200px",
-marginTop:"5px",
-borderRadius:"5px"
-}}
-/>
-
-))}
-
-{/* reply preview */}
-
-{msg.replyTo && (
-
-<div
-onClick={()=>
-scrollToMessage(msg.replyTo._id)
-}
-style={{
-fontSize:"12px",
-background:"#eee",
-padding:"3px",
-marginBottom:"5px",
-borderLeft:"3px solid gray",
-cursor:"pointer"
-}}
->
-
-↩ {msg.replyTo.text}
-
-</div>
-
-)}
-
-
-{/* message text */}
-
-<div>
-
-{msg.isDeleted
-? "Message deleted"
-: msg.text}
-
-</div>
-
-{isMine && (
-
-<div style={{
-fontSize:"11px",
-textAlign:"right",
-marginTop:"3px",
-color:
-msg.seenBy?.length > 1
-? "blue"
-: "gray"
-}}>
-
-{msg.seenBy?.length >= 2 ? "✓✓" : "✓"}
-
-</div>
-
-)}
-
-{/* reactions display */}
-
-{/* {msg.reactions?.length > 0 && (
-
-<div style={{marginTop:"5px"}}>
-
-{msg.reactions.map((r,i)=>(
-<span key={i}>
-{r.emoji}
-</span>
-))}
-
-</div>
-
-)} */}
-
-{msg.reactions?.length > 0 && (
-
-<div style={{
-marginTop:"5px",
-display:"flex",
-gap:"5px",
-flexWrap:"wrap"
-}}>
-
-{Object.entries(
-
-msg.reactions.reduce((acc,reaction)=>{
-
-if(!acc[reaction.emoji]){
-
-acc[reaction.emoji] = 0;
-
-}
-
-acc[reaction.emoji]++;
-
-return acc;
-
-},{})
-
-).map(([emoji,count])=>(
-
-<div
-key={emoji}
-style={{
-background:"#eee",
-padding:"2px 8px",
-borderRadius:"12px",
-fontSize:"13px"
-}}
->
-
-{emoji} {count}
-
-</div>
-
-))}
-
-</div>
-
-)}
-
-
-{/* ACTIONS */}
-
-<div style={{
-marginTop:"5px",
-display:"flex",
-gap:"5px",
-fontSize:"12px"
-}}>
-
-<button onClick={()=>handleReply(msg)}>
-Reply
-</button>
-
-<button onClick={()=>reactToMessage(msg,"👍")}>
-👍
-</button>
-
-<button onClick={()=>reactToMessage(msg,"❤️")}>
-❤️
-</button>
-
-<button onClick={()=>reactToMessage(msg,"😂")}>
-😂
-</button>
-
-
-{isMine && (
-
-<>
-
-<button onClick={()=>handleEdit(msg)}>
-Edit
-</button>
-
-<button onClick={()=>handleDelete(msg)}>
-Delete
-</button>
-
-</>
-
-)}
-
-</div>
-
-</div>
-
-</div>
-
-);
-
-})}
-
-</div>
-
+return (
+  <div className="message-list">
+    {messages.map((msg) => {
+      const isMine = String(msg.senderId) === String(currentUser._id);
+
+      return (
+        <div
+          id={`msg-${msg._id}`}
+          key={msg._id}
+          className={`message-row ${isMine ? "mine" : "other"}`}
+        >
+          <div className="message-bubble">
+            
+            {/* File Attachments */}
+            {msg.attachments?.map((file, i) => (
+              <img
+                key={i}
+                src={file}
+                alt=""
+                className="message-attachment"
+              />
+            ))}
+
+            {/* Reply Preview Core Window */}
+            {msg.replyTo && (
+              <div
+                onClick={() => scrollToMessage(msg.replyTo._id)}
+                className="reply-preview-container"
+              >
+                ↩ {msg.replyTo.text}
+              </div>
+            )}
+
+            {/* Message text block style */}
+            <div className={`message-text ${msg.isDeleted ? "deleted" : ""}`}>
+              {msg.isDeleted ? "Message deleted" : msg.text}
+            </div>
+
+            {/* Dynamic Status Delivery Ticks */}
+            {isMine && (
+              <div className={`msg-status-tick ${msg.seenBy?.length > 1 ? "seen" : "unseen"}`}>
+                {msg.seenBy?.length >= 2 ? "✓✓" : "✓"}
+              </div>
+            )}
+
+            {/* Collapsed Clean Reaction Display logic mapping */}
+            {msg.reactions?.length > 0 && (
+              <div className="reactions-wrapper">
+                {Object.entries(
+                  msg.reactions.reduce((acc, reaction) => {
+                    if (!acc[reaction.emoji]) {
+                      acc[reaction.emoji] = 0;
+                    }
+                    acc[reaction.emoji]++;
+                    return acc;
+                  }, {})
+                ).map(([emoji, count]) => (
+                  <div key={emoji} className="reaction-badge">
+                    {emoji} {count}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Message Action Sheet Triggers */}
+            <div className="message-actions-bar">
+              <button onClick={() => handleReply(msg)} className="action-btn">
+                Reply
+              </button>
+              <button onClick={() => reactToMessage(msg, "👍")} className="action-btn">
+                👍
+              </button>
+              <button onClick={() => reactToMessage(msg, "❤️")} className="action-btn">
+                ❤️
+              </button>
+              <button onClick={() => reactToMessage(msg, "😂")} className="action-btn">
+                😂
+              </button>
+
+              {isMine && (
+                <>
+                  <button onClick={() => handleEdit(msg)} className="action-btn">
+                    Edit
+                  </button>
+                  <button onClick={() => handleDelete(msg)} className="action-btn delete">
+                    Delete
+                  </button>
+                </>
+              )}
+            </div>
+
+          </div>
+        </div>
+      );
+    })}
+  </div>
 );
 
 }

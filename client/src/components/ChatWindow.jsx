@@ -54,37 +54,25 @@ export default function ChatWindow({
     );
   }
 
-  return (
-    <div
-      style={{
-        flex: 1,
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
-      <MessageList
-        conversation={currentChat}
-        messages={messages}
-        setReplyMessage={setReplyMessage}
-      />
+ return (
+  <div className="chat-window">
+    <MessageList
+      conversation={currentChat}
+      messages={messages}
+      setReplyMessage={setReplyMessage}
+    />
 
-      {typingUser && (
-        <div
-          style={{
-            padding: "5px 10px",
-            fontSize: "12px",
-            color: "gray",
-          }}
-        >
-          Typing...
-        </div>
-      )}
+    {typingUser && (
+      <div className="typing-indicator">
+        Typing...
+      </div>
+    )}
 
-      <MessageInput
-        conversation={currentChat}
-        replyMessage={replyMessage}
-        setReplyMessage={setReplyMessage}
-      />
-    </div>
-  );
+    <MessageInput
+      conversation={currentChat}
+      replyMessage={replyMessage}
+      setReplyMessage={setReplyMessage}
+    />
+  </div>
+);
 }
