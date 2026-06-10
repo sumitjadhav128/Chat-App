@@ -197,7 +197,7 @@ return (
   <div className="chat-sidebar">
     <input
       type="text"
-      placeholder="Search users..."
+      placeholder="🔍 Search users"
       value={search}
       onChange={(e) => setSearch(e.target.value)}
       className="search-input"
@@ -205,15 +205,22 @@ return (
 
     {/* Render User Results */}
 
-    <h3 className="section-title">Available Users</h3>
+    <h3 className="section-title">  Discover People</h3>
     {results.map((user) => (
       <div
         key={user._id}
         onClick={() => startChat(user)}
         className="user-search-item"
       >
-        <div className="user-name">{user.name}</div>
-        <div className="user-email">{user.email}</div>
+         <div className="user-avatar">
+    {user.name?.charAt(0).toUpperCase()}
+  </div> 
+       <div style={{ paddingLeft: "10px"}}>
+        {user.name}
+        <div className="user-email">  {user.email}</div>
+       </div>
+
+       <button className="chat-btn">Chat</button>
       </div>
     ))}
 
@@ -238,18 +245,28 @@ return (
           onClick={() => setCurrentChat(conv)}
           className="conversation-item"
         >
-          <div>
-            <div className="user-name">
-              {conv.isGroup
-                ? conv.groupName || "Group Chat"
-                : otherUser?.name || otherUser?.email || "User"}
-            </div>
+          <div style={{display: "flex", alignItems: "center", justifyContent: "center"
+          }}>
+            <div className="user-avatar">
+  {conv.isGroup
+    ? conv.groupName && conv.groupName.charAt(0).toUpperCase()
+    : otherUser?.name?.charAt(0).toUpperCase()}
+</div>
 
-            {!conv.isGroup && (
-              <div className={`status-text ${isOnline ? "status-online" : ""}`}>
+ <div style={{paddingLeft: "10px"}}>{conv.isGroup ? conv.groupName || "Group Chat" : otherUser?.name || otherUser?.email || "User"}
+ 
+ <div style={{ fontSize: "14px", color:"#64748b"}}> {conv.isGroup && "Group Chat"}</div>
+
+   {!conv.isGroup && (
+              <div style={{fontSize: "14px"}}  className={`status-text ${isOnline ? "status-online" : ""}`}>
                 {isOnline ? "● Online" : "Offline"}
+
+                 {conv.isGroup && "Group Chat"}
               </div>
             )}
+ </div>
+
+           
           </div>
         </div>
       );
@@ -293,7 +310,7 @@ return (
                   style={{ padding: "6px" }}
                 >
                   <span className="user-name" style={{ fontSize: "13px" }}>
-                    {user.name} ({user.email})
+                  {user.email}
                   </span>
                 </div>
               );

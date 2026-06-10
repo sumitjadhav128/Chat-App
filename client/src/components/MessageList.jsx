@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext } from "react";
+import { useEffect, useState, useContext, useRef } from "react";
 import API from "../services/api";
 import socket from "../services/socket";
 import { AuthContext } from "../context/AuthContext";
@@ -7,6 +7,8 @@ export default function MessageList({ conversation, setReplyMessage }) {
 
 const [messages,setMessages] = useState([]);
 const { currentUser } = useContext(AuthContext);
+
+const bottomRef = useRef(null);
 
 
 useEffect(()=>{
@@ -20,6 +22,14 @@ setMessages(res.data);
 
 },[conversation]);
 
+// auto scroll after msg
+useEffect(() => {
+
+  bottomRef.current?.scrollIntoView({
+    behavior: "smooth"
+  });
+
+}, [messages.length]);
 
 // receive new message
 useEffect(()=>{
@@ -155,6 +165,7 @@ conversationId: msg.conversationId
 
 };
 
+
 // msg scroll effect
 const scrollToMessage = (messageId)=>{
 
@@ -190,6 +201,8 @@ return (
           key={msg._id}
           className={`message-row ${isMine ? "mine" : "other"}`}
         >
+
+          <div ref={bottomRef}></div>
           <div className="message-bubble">
             
             {/* File Attachments */}
@@ -275,6 +288,8 @@ return (
       );
     })}
   </div>
+
+
 );
 
 }

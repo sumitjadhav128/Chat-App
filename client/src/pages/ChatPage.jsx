@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext } from "react";
+import { useEffect, useState, useContext, useRef } from "react";
 import API from "../services/api";
 import Sidebar from "../components/Sidebar";
 import ChatWindow from "../components/ChatWindow";
@@ -17,6 +17,8 @@ const [replyMessage,setReplyMessage] = useState(null);
 const { currentUser } = useContext(AuthContext);
 const [onlineUsers,setOnlineUsers] = useState([]);
 
+const bottomRef = useRef(null);
+
 useEffect(()=>{
 
 socket.emit("add-user", currentUser._id);
@@ -32,6 +34,7 @@ console.log(err);
 });
 
 },[currentUser]);
+
 
 useEffect(()=>{
 
@@ -96,6 +99,7 @@ socket.off("new-conversation");
 
 },[currentUser]);
 
+
 return (
   <div className="chat-page-container">
     
@@ -115,8 +119,8 @@ return (
       {/* 📱 MOBILE HEADER: This injects a clean top navigation bar on phones */}
       {currentChat && (
         <div className="mobile-chat-header">
-          <button 
-            className="back-btn" 
+          <button
+            className="back-btn" style={{ height: "8px"}} 
             onClick={() => setCurrentChat(null)} // Setting currentChat to null returns to Sidebar view
           >
             ← Back
@@ -124,7 +128,7 @@ return (
           <span className="user-name" style={{ margin: 0 }}>
             {currentChat.isGroup
               ? currentChat.groupName || "Group Chat"
-              : "Active Chat"}
+              : ""}
           </span>
         </div>
       )}
