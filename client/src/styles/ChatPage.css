@@ -68,6 +68,8 @@
   cursor: pointer;
 
   margin-bottom: 10px;
+  margin-right: 5px;
+
 
   transition: all 0.2s ease;
 }
@@ -107,7 +109,7 @@
 
 /* --- Action Buttons --- */
 .btn-primary {
-  width: 100%;
+  width: 99%;
   background-color: var(--primary-color);
   color: white;
   border: none;
