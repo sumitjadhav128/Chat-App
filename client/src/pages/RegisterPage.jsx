@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, Link } from "react-router-dom"
- function RegisterPage() {
+ export default function  RegisterPage() {
     const [form, setForm] = useState(
         {
             name:"",
@@ -8,7 +8,7 @@ import { useNavigate, Link } from "react-router-dom"
             password: ""
         }
     )
-
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     const handleChange = (e) => {
     setForm(
@@ -22,7 +22,9 @@ import { useNavigate, Link } from "react-router-dom"
     const handleSubmit = async (e) => {
         e.preventDefault()
 
-        const response = await fetch("https://chat-app-gr95.onrender.com/api/auth/register", {
+       try {
+        setLoading(true)
+         const response = await fetch("https://chat-app-gr95.onrender.com/api/auth/register", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
@@ -38,7 +40,13 @@ import { useNavigate, Link } from "react-router-dom"
         } else {
             alert(data.message)
         }
-    }
+       } catch(error) {
+        console.log(error)
+       }
+     finally {
+    setLoading(false)
+    } }
+
   return (
   <div className="login-page">
     <div className="login-card">
@@ -77,7 +85,7 @@ import { useNavigate, Link } from "react-router-dom"
           className="login-btn"
           type="submit"
         >
-          Register
+          { loading ? "..." : "Register"}
         </button>
 
       </form>
@@ -92,5 +100,3 @@ import { useNavigate, Link } from "react-router-dom"
   </div>
 );
 }
-
-export default RegisterPage

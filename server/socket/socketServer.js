@@ -58,6 +58,7 @@ socket.on("send-message", async (data) => {
     seenBy: [data.senderId]
   });
 
+
   const saved = await newMessage.save();
 
   const populated = await Message.findById(saved._id).lean();
