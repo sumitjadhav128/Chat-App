@@ -45,44 +45,26 @@ io.emit("get-users", onlineUsers);
 
 
 // send message to that room
-socket.on("send-message", async ({
-conversationId,
-senderId,
-text,
-attachments,
-replyTo=null
-}) => {
+socket.on("send-message", async (data) => {
 
-try {
+  console.log("🔥 RAW SOCKET DATA:", data);
 
-const newMessage = new Message({
-conversationId,
-senderId,
-text,
-attachments,
-replyTo,
-seenBy:[senderId]
-});
+  const newMessage = new Message({
+    conversationId: data.conversationId,
+    senderId: data.senderId,
+    text: data.text || "",
+    attachments: data.attachments || [],
+    replyTo: data.replyTo || null,
+    seenBy: [data.senderId]
+  });
 
-const savedMessage = await newMessage.save();
+  const saved = await newMessage.save();
 
-const populatedMessage =
-await Message.findById(savedMessage._id)
-.populate("replyTo","text");
+  const populated = await Message.findById(saved._id).lean();
 
-io.to(conversationId).emit(
-"receive-message",
-populatedMessage
-);
+  console.log("🚀 FINAL EMIT DATA:", populated);
 
-console.log(populatedMessage);
-
-} catch(error){
-
-console.log("Message Save Error:",error);
-
-}
-
+  io.to(data.conversationId).emit("receive-message", populated);
 });
 
 

@@ -28,7 +28,7 @@ app.use("/api/conversations", require("./routes/conversations"));
 // messages Route
 app.use("/api/messages", require("./routes/messages"));
 // upload Route
-app.use("/api/upload",  require("./routes/upload"));
+// app.use("/api/upload",  require("./routes/upload"));
 // userRoute
 app.use("/api/user",  require("./routes/user"));
 

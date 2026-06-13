@@ -12,7 +12,7 @@ cloudinary.config({
 const storage = new CloudinaryStorage({
   cloudinary,
   params: async (req, file) => ({
-    folder: "Chat-App",
+    folder: "chat-app",
     resource_type: "image",
     format: file.mimetype.split("/")[1], // jpg/png
   }),

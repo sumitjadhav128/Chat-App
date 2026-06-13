@@ -2,12 +2,14 @@ import API from "../services/api";
 import { useState, useContext, useEffect } from "react";
 import socket from "../services/socket";
 import { AuthContext } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 export default function MessageInput({ conversation, replyMessage, setReplyMessage }) {
 
 const [text, setText] = useState("");
 const [file,setFile] = useState(null);
 const { currentUser } = useContext(AuthContext);
+const [loading, SetLoading ] = useState(false)
 
 //  Typing Indigetor
 useEffect(()=>{
@@ -37,44 +39,45 @@ return ()=>clearTimeout(timeout);
 },[text]);
 
 const handleSend = async () => {
+ try {
+   SetLoading(true)
+ console.log("frontend handlesend hit")
+  if (!conversation) return;
 
-if(!conversation) return;
+  let attachments = [];
 
-let attachments = [];
+if (file) {
+  const formData = new FormData();
 
+  formData.append("conversationId", conversation._id);
+  formData.append("senderId", currentUser._id);
+  formData.append("text", text);
+  formData.append("attachments", file);
 
-// upload file first
+  await API.post("/messages", formData);
 
-if(file){
-
-const formData = new FormData();
-
-formData.append("file", file);
-
-const uploadRes = await API.post(
-"/upload",
-formData
-);
-
-attachments.push(uploadRes.data.fileUrl);
-
+  return; // message already sent from backend
 }
+ console.log("response sent")
 
+  socket.emit("send-message", {
+    conversationId: conversation._id,
+    senderId: currentUser._id,
+    text,
+    attachments,
+    replyTo: replyMessage?._id || null
+  });
 
-socket.emit("send-message",{
-conversationId: conversation._id,
-senderId: currentUser._id,
-text,
-attachments,
-replyTo: replyMessage?._id || null
-});
+  setText("");
+  setFile(null);
+  setReplyMessage(null);
 
-setText("");
-setFile(null);
-setReplyMessage(null);
-
+ } catch (error) {
+console.log(error)
+ } finally {
+  SetLoading(false)
+ }
 };
-
 
 // ENTER KEY SUPPORT
 
@@ -119,7 +122,7 @@ return (
       />
 
       <button onClick={handleSend} className="send-btn">
-        Send
+        {loading? "..." : "Send"}
       </button>
     </div>
   </div>

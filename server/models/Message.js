@@ -15,7 +15,10 @@ required:true
 
 text:String,
 
-attachments:[String],
+attachments: [{
+  url: String,
+  public_id: String
+}],
 
 replyTo:{
 type:mongoose.Schema.Types.ObjectId,
