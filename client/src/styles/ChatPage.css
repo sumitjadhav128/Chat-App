@@ -362,6 +362,7 @@
   border-radius: 8px;
   font-size: 14px;
   font-weight: 500;
+  margin-right: 6px;
   cursor: pointer;
 }
 
@@ -446,7 +447,7 @@
     position: relative;
     overflow: hidden;
     height: 90vh;
-    width: 101%;
+    width: 102%;
     padding-left: 8px;
   }
 
