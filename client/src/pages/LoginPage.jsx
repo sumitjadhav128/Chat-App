@@ -1,7 +1,8 @@
 import { useState, useContext } from "react";
 import API from "../services/api";
 import { AuthContext } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import "../styles/auth.css"
 
 export default function LoginPage(){
 
@@ -36,31 +37,45 @@ console.log(err);
 
 };
 
-return(
+return (
+  <div className="login-page">
+    <div className="login-card">
 
-<div>
+      <h2 className="login-title">Welcome Back</h2>
+      <p className="login-subtitle">
+        Login to continue chatting
+      </p>
 
-<h2>Login</h2>
+      <input
+        className="login-input"
+        placeholder="Email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+      />
 
-<input
-placeholder="Email"
-value={email}
-onChange={(e)=>setEmail(e.target.value)}
-/>
+      <input
+        className="login-input"
+        type="password"
+        placeholder="Password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+      />
 
-<input
-type="password"
-placeholder="Password"
-value={password}
-onChange={(e)=>setPassword(e.target.value)}
-/>
+      <button
+        className="login-btn"
+        onClick={handleLogin}
+        disabled={loading}
+      >
+        {loading ? "Loading..." : "Login"}
+      </button>
 
-<button onClick={handleLogin} disabled={loading}>
-{loading? "Loading...." : "Login"}
-</button>
-
+      <div className="login-footer">
+  Don't have an account?{" "}
+  <Link to="/register">Register</Link>
 </div>
 
+    </div>
+  </div>
 );
 
 }
