@@ -146,6 +146,10 @@ const newText = prompt("Edit message",msg.text);
 
 if(!newText) return;
 
+if (newText.trim() === msg.text.trim()) {
+    return;
+  }
+
 socket.emit("edit-message",{
 messageId: msg._id,
 senderId: currentUser._id,
