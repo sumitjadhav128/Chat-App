@@ -11,7 +11,7 @@ import axios from "axios";
 
 const API = axios.create({
   // baseURL: "http://192.168.59.196:5000/api",
-  baseURL: "https://chat-app-gr95.onrender.com/api"
+   baseURL: "https://chat-app-gr95.onrender.com/api"
 });
 
 API.interceptors.request.use((req)=>{
