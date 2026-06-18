@@ -136,6 +136,12 @@
   padding-top: 10px;
 }
 
+.edited-label{
+  font-size: 11px;
+  color: #64748b;
+  font-style: italic;
+}
+
 /* --- Chat Window Structure --- */
 .chat-window {
   flex: 1;

@@ -1,8 +1,3 @@
-import { useEffect, useState, useContext, useRef } from "react";
-import API from "../services/api";
-import socket from "../services/socket";
-import { AuthContext } from "../context/AuthContext";
-
 export default function MessageList({ conversation, setReplyMessage }) {
 
 const [messages,setMessages] = useState([]);
@@ -206,14 +201,14 @@ return (
           <div className="message-bubble">
             
             {/* File Attachments */}
-           {msg.attachments?.map((file, i) => (
-  <img
-    key={i}
-    src={file.url}
-    alt="attachment"
-    className="message-attachment"
-  />
-))}
+            {msg.attachments?.map((file, i) => (
+              <img
+                key={i}
+                src={file}
+                alt=""
+                className="message-attachment"
+              />
+            ))}
 
             {/* Reply Preview Core Window */}
             {msg.replyTo && (
@@ -228,10 +223,6 @@ return (
             {/* Message text block style */}
             <div className={`message-text ${msg.isDeleted ? "deleted" : ""}`}>
               {msg.isDeleted ? "Message deleted" : msg.text}
-
-               {msg.isEdited && !msg.isDeleted && (
-    <span className="edited-label"> (edited)</span>
-  )}
             </div>
 
             {/* Dynamic Status Delivery Ticks */}
