@@ -1,8 +1,8 @@
 import API from "../services/api";
-import { useState, useContext, useEffect } from "react";
+import { useState, useContext, useEffect, useRef  } from "react";
 import socket from "../services/socket";
 import { AuthContext } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate} from "react-router-dom";
 
 export default function MessageInput({ conversation, replyMessage, setReplyMessage }) {
 
@@ -10,6 +10,7 @@ const [text, setText] = useState("");
 const [file,setFile] = useState(null);
 const { currentUser } = useContext(AuthContext);
 const [loading, SetLoading ] = useState(false)
+const fileInputRef = useRef(null);
 
 //  Typing Indigetor
 useEffect(()=>{
@@ -56,7 +57,15 @@ if (file) {
 
   await API.post("/messages", formData);
 
-  return; // message already sent from backend
+  setText("");
+  setFile(null);
+  setReplyMessage(null);
+
+  if (fileInputRef.current) {
+    fileInputRef.current.value = "";
+  }
+
+  return;
 }
  console.log("response sent")
 
@@ -69,8 +78,11 @@ if (file) {
   });
 
   setText("");
-  setFile(null);
   setReplyMessage(null);
+
+  if (fileInputRef.current) {
+    fileInputRef.current.value = "";
+  }
 
  } catch (error) {
 console.log(error)
@@ -116,6 +128,7 @@ return (
       />
 
       <input
+        ref={fileInputRef}
         type="file"
         onChange={(e) => setFile(e.target.files[0])}
         className="file-input-custom"
