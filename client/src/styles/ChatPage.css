@@ -25,9 +25,7 @@
 
 /* --- Sidebar Styling --- */
 .chat-sidebar {
-    width: 320px;
-  min-width: 280px;
-  max-width: 350px;
+  width: 320px;
   background-color: var(--bg-sidebar);
   border-right: 1px solid var(--border-color);
   display: flex;
@@ -148,10 +146,11 @@
 .chat-window {
   flex: 1;
   display: flex;
-  min-height: 0;
+   height: 100px;
+   overflow-y: auto;
+   scrollbar-width: none;
   flex-direction: column;
   background-color: var(--bg-chat-window);
-  overflow: hidden;
 }
 
 .typing-indicator {
@@ -455,23 +454,26 @@
   .chat-page-container {
     position: relative;
     overflow: hidden;
-    height: 100vh;
-    width: 100%;
-    padding-left: 0;
+    height: 90vh;
+    width: 102%;
+    padding-left: 8px;
   }
 
-  .chat-sidebar,
-  .chat-window {
-    width: 100%;
-    max-width: 100%;
-    height: 100%;
-    position: absolute;
+  /* Force both panels to take up full width on mobile */
+  .chat-sidebar, .chat-window {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 750px;
+   overflow-y: auto;
+   scrollbar-width: none;
+        position: absolute;
     top: 0;
     left: 0;
-    overflow-y: auto;
     transition: transform 0.3s ease-in-out;
+   
   }
 
+  /* Logic state classes controlled by your active chat */
   .chat-sidebar.hide-on-mobile {
     transform: translateX(-100%);
   }
@@ -485,10 +487,12 @@
     z-index: 10;
   }
 
+  /* Make message bubble widths wider on small screens */
   .message-bubble {
-    max-width: 90%;
+    max-width: 85% !important;
   }
 
+  /* Stack input layout controls on mobile */
   .input-row-layout {
     flex-wrap: wrap;
     gap: 8px;
@@ -496,28 +500,35 @@
 
   .message-textarea {
     width: 100%;
-    order: 1;
+    flex: none;
   }
 
   .file-input-custom {
-    width: 100%;
     max-width: 100%;
-    order: 2;
+    flex: 1;
   }
 
-  .send-btn {
-    width: 100%;
-    order: 3;
-    margin-right: 0;
-  }
-
+  /* Responsive styling for Mobile Back Button Header */
   .mobile-chat-header {
+    background-color: var(--bg-sidebar);
+    border-bottom: 1px solid var(--border-color);
+    padding: 12px 16px;
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 12px;
-    background: var(--bg-sidebar);
-    border-bottom: 1px solid var(--border-color);
+    gap: 12px;
+    z-index: 9;
+  }
+
+  .back-btn {
+    background: transparent;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    color: var(--primary-color);
+    padding: 4px 8px;
+    padding-left: 1px;
+    display: flex;
+    align-items: center;
   }
 }
 
@@ -529,52 +540,8 @@
   .chat-sidebar, .chat-window {
     position: static !important;
     transform: none !important;
-      height: 100vh;
+      height: 684px;
     overflow-y: auto;
     scrollbar-width: none;
-  }
-}
-
-/* tablet view */
-@media (min-width: 769px) and (max-width: 1024px) {
-
-  .chat-sidebar {
-    width: 280px;
-    min-width: 280px;
-  }
-
-  .message-bubble {
-    max-width: 75%;
-  }
-
-  .search-input {
-    font-size: 14px;
-  }
-}
-
-@media (max-width: 480px) {
-
-  .message-bubble {
-    max-width: 95%;
-    padding: 10px;
-  }
-
-  .user-avatar {
-    width: 36px;
-    height: 36px;
-    min-width: 36px;
-    font-size: 13px;
-  }
-
-  .user-name {
-    font-size: 14px;
-  }
-
-  .message-text {
-    font-size: 13px;
-  }
-
-  .send-btn {
-    padding: 12px;
   }
 }
