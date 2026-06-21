@@ -193,6 +193,13 @@ console.log(error);
 
 };
 
+// only show 3 users in Discover Section
+const filteredUsers = results.filter(user =>
+  user.name.toLowerCase().includes(search.toLowerCase())
+);
+// now instead of rendering results.map(), we do 
+// (search.trim() ? filteredUsers : filteredUsers.slice(0, 3)).map
+
 return (
   <div className="chat-sidebar">
     <input
@@ -206,7 +213,7 @@ return (
     {/* Render User Results */}
 
     <h3 className="section-title">  Discover People</h3>
-    {results.map((user) => (
+    {(search.trim() ? filteredUsers : filteredUsers.slice(0, 3)).map((user) => (
       <div
         key={user._id}
         onClick={() => startChat(user)}
