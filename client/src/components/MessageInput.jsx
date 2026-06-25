@@ -42,12 +42,14 @@ return ()=>clearTimeout(timeout);
 const handleSend = async () => {
  try {
    SetLoading(true)
+   alert("handlesend hit")
  console.log("frontend handlesend hit")
   if (!conversation) return;
 
   let attachments = [];
 
 if (file) {
+    alert("file selected")
   const formData = new FormData();
 
   formData.append("conversationId", conversation._id);
@@ -85,6 +87,13 @@ if (file) {
   }
 
  } catch (error) {
+  alert(error)
+    alert(
+    JSON.stringify({
+      message: error.message,
+      code: error.code
+    })
+  );
 console.log(error)
  } finally {
   SetLoading(false)
