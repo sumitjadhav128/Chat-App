@@ -3,6 +3,7 @@ import API from "../services/api";
 import { AuthContext } from "../context/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
 import "../styles/auth.css"
+import toast from "react-hot-toast";
 
 export default function LoginPage(){
 
@@ -16,7 +17,13 @@ const navigate = useNavigate();
 
 const handleLogin = async () => {
 
+
 try{
+
+  if (!email || !password) {
+  toast.error("Please fill all fields.");
+  return;
+}
 
 setLoading(true)
 const res = await API.post("/auth/login",{
@@ -27,10 +34,14 @@ password
 setCurrentUser(res.data.user);
 
 localStorage.setItem("token", res.data.token);
+ toast.success("Welcome back!");
 navigate("/chat");
 
 }catch(err){
-console.log(err);
+  toast.error(
+      err.response?.data?.msg ||
+      "Login failed. Please try again."
+    );
 }finally {
  setLoading(false)
 }
@@ -48,7 +59,9 @@ return (
 
       <input
         className="login-input"
+        type="email"
         placeholder="Email"
+         required
         value={email}
         onChange={(e) => setEmail(e.target.value)}
       />
@@ -58,6 +71,7 @@ return (
         type="password"
         placeholder="Password"
         value={password}
+        required
         onChange={(e) => setPassword(e.target.value)}
       />
 

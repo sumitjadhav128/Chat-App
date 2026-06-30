@@ -2,13 +2,14 @@ import { Routes, Route } from 'react-router-dom'
 import RegisterPage from './pages/RegisterPage'
 import LoginPage from './pages/LoginPage'
 import ChatPage from './pages/ChatPage'
-
+import { Toaster } from "react-hot-toast";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
 
   return (
     <>
+    <Toaster position="top-center" />
      <Routes>
       <Route path="/" element={<RegisterPage />} />
       <Route path="/register" element={<RegisterPage></RegisterPage>}></Route>

@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, Link } from "react-router-dom"
+import toast from "react-hot-toast";
+
  export default function  RegisterPage() {
     const [form, setForm] = useState(
         {
@@ -38,10 +40,16 @@ import { useNavigate, Link } from "react-router-dom"
            localStorage.setItem("token", data.token)
             navigate("/login");
         } else {
-            alert(data.message)
+            // alert(data.message)
+             toast.error(data.msg || "Registration failed.");
         }
        } catch(error) {
-        console.log(error)
+         toast.error(
+    error.response?.data?.msg ||
+    error.response?.data?.msg ||
+    error.msg ||
+    "Registration failed. Please try again."
+  );
        }
      finally {
     setLoading(false)
@@ -64,6 +72,7 @@ import { useNavigate, Link } from "react-router-dom"
           name="name"
           placeholder="Full Name"
           onChange={handleChange}
+          required
         />
 
         <input
@@ -71,6 +80,7 @@ import { useNavigate, Link } from "react-router-dom"
           name="email"
           placeholder="Email Address"
           onChange={handleChange}
+          required
         />
 
         <input
@@ -79,6 +89,7 @@ import { useNavigate, Link } from "react-router-dom"
           type="password"
           placeholder="Password"
           onChange={handleChange}
+          required
         />
 
         <button

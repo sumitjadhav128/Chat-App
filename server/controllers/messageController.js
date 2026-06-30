@@ -40,7 +40,6 @@ io.to(req.body.conversationId).emit(
     res.status(201).json(savedMessage);
 
   } catch (error) {
-    alert(error)
     console.log("SEND MESSAGE ERROR:", error);
     res.status(500).json({ error: error.message });
   }
